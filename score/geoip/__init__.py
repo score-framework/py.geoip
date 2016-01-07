@@ -24,56 +24,6 @@
 # the discretion of STRG.AT GmbH also the competent court, in whose district the
 # Licensee has his registered seat, an establishment or assets.
 
-from score.init import init_object, ConfiguredModule
-import dns.resolver
+from ._init import init, ConfiguredGeoipModule, IPNotFound
 
-
-def init(confdict, kvcache_conf=None):
-    """
-    Initializes this module acoording to :ref:`our module initialization
-    guidelines <module_initialization>` with the following configuration keys:
-
-    :confkey:`backend`
-        The backend object configuration that will be passed to
-        :func:`score.init.init_object`. Have a look at the configurable
-        backend's constructor parameters for further information about
-        the backend's configurable keys.
-
-    """
-    backend = init_object(confdict, 'backend')
-    cache_container = None
-    if kvcache_conf is not None:
-        kvcache_conf.register_generator('score.geoip', backend.__getitem__)
-        cache_container = kvcache_conf['score.geoip']
-    return ConfiguredGeoipModule(backend, cache_container)
-
-
-class ConfiguredGeoipModule(ConfiguredModule):
-    """
-    This module's :class:`configuration object
-    <score.init.ConfiguredModule>`.
-    """
-
-    def __init__(self, backend, cache_container=None):
-        super().__init__(__package__)
-        self.backend = backend
-        self.cache_container = cache_container
-
-    def __getitem__(self, ip):
-        try:
-            ip = str(dns.resolver.query(ip)[0])
-        except dns.resolver.NXDOMAIN:
-            raise IPNotFound(ip, 'Domain not resolvable.')
-        if self.cache_container is None:
-            return self.backend[ip]
-        return self.cache_container[ip]
-
-
-class IPNotFound(Exception):
-    """
-    Thrown if IP lookup failed.
-    """
-
-    def __init__(self, ip, cause=None):
-        self.ip = ip
-        self.cause = cause
+__all__ = ('init', 'ConfiguredGeoipModule', 'IPNotFound')
