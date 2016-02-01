@@ -25,8 +25,6 @@
 # Licensee has his registered seat, an establishment or assets.
 
 import click
-from score.cli import config
-from score.geoip import init
 
 
 @click.group()
@@ -40,24 +38,18 @@ def main():
 @click.argument('ip')
 @click.option('-f', '--format', 'frmt', default='json',
               type=click.Choice(['json', 'xml']))
-def lookup(ip, frmt):
-    kvcache_conf = None
-    try:
-        import score.kvcache
-    except ImportError:
-        pass
-    else:
-        kvcache_conf = score.kvcache.init(dict(config()['score.kvcache']))
-    module = init(dict(config()[__package__]), kvcache_conf)
+@click.pass_context
+def lookup(click_ctx, ip, frmt):
+    geoip = click_ctx.obj['conf'].load('geoip')
     if frmt == 'json':
         from json import dumps as json_encode
-        print(json_encode(module[ip], indent=4).strip())
+        print(json_encode(geoip[ip], indent=4).strip())
         return
     from xml.dom.minidom import getDOMImplementation
     impl = getDOMImplementation()
     doc = impl.createDocument(None, 'location', None)
     root = doc.documentElement
-    for k, v in module[ip].items():
+    for k, v in geoip[ip].items():
         el = doc.createElement(str(k))
         el.appendChild(doc.createTextNode(str(v)))
         root.appendChild(el)
