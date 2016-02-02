@@ -15,7 +15,7 @@ setup(
     author_email='support@strg.at',
     url='http://strg.at',
     keywords='web wsgi bfg pylons pyramid',
-    packages=['score.geoip'],
+    packages=['score', 'score.geoip'],
     namespace_packages=['score'],
     license='LGPL',
     classifiers=[
@@ -40,13 +40,7 @@ setup(
         ]
     },
     install_requires=[
-        'score.init >= 0.1',
+        'score.init >= 0.3',
         'dnspython3',
     ],
-    extras_require={
-        'cli': [
-            'score.kvcache >= 0.1',
-            'score.cli >= 0.1',
-        ]
-    }
 )
