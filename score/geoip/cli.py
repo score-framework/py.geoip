@@ -55,3 +55,7 @@ def lookup(click_ctx, ip, frmt):
         root.appendChild(el)
     doc.appendChild(root)
     print(doc.toprettyxml(indent=' '*4, newl='\n').strip())
+
+
+if __name__ == '__main__':
+    main()
