@@ -26,4 +26,6 @@
 
 from ._init import init, ConfiguredGeoipModule, IPNotFound
 
+__version__ = '0.2.1'
+
 __all__ = ('init', 'ConfiguredGeoipModule', 'IPNotFound')
