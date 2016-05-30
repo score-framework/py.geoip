@@ -24,8 +24,14 @@
 # the discretion of STRG.AT GmbH also the competent court, in whose district the
 # Licensee has his registered seat, an establishment or assets.
 
-from score.init import init_object, ConfiguredModule
+from score.init import parse_object, ConfiguredModule
+import re
 import dns.resolver
+
+
+defaults = {
+    'backend': 'score.geoip.backend.IpApi()'
+}
 
 
 def init(confdict, kvcache=None):
@@ -33,14 +39,16 @@ def init(confdict, kvcache=None):
     Initializes this module acoording to :ref:`our module initialization
     guidelines <module_initialization>` with the following configuration keys:
 
-    :confkey:`backend`
+    :confkey:`backend` :confdefault:`score.geoip.backend.IpApi()`
         The backend object configuration that will be passed to
-        :func:`score.init.init_object`. Have a look at the configurable
-        backend's constructor parameters for further information about
-        the backend's configurable keys.
+        :func:`score.init.parse_object`. Will use the `ip-api`_ backend by
+        default, which is free for non-commercial projects.
 
+        .. _ip-api: http://ip-api.com/
     """
-    backend = init_object(confdict, 'backend')
+    conf = defaults.copy()
+    conf.update(confdict)
+    backend = parse_object(conf, 'backend')
     cache_container = None
     if kvcache is not None:
         kvcache.register_generator('score.geoip', backend.__getitem__)
@@ -60,10 +68,11 @@ class ConfiguredGeoipModule(ConfiguredModule):
         self.cache_container = cache_container
 
     def __getitem__(self, ip):
-        try:
-            ip = str(dns.resolver.query(ip)[0])
-        except dns.resolver.NXDOMAIN:
-            raise IPNotFound(ip, 'Domain not resolvable.')
+        if not re.match(r'^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$', ip):
+            try:
+                ip = str(dns.resolver.query(ip)[0])
+            except dns.resolver.NXDOMAIN:
+                raise ValueError('Invalid IP ' + ip)
         if self.cache_container is None:
             return self.backend[ip]
         return self.cache_container[ip]
