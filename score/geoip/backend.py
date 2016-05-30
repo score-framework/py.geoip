@@ -60,6 +60,28 @@ class Dummy(Backend):
         raise IPNotFound(ip)
 
 
+class IpApi(Backend):
+    """
+    A free IP geolocalization service, provide by http://ip-api.com.
+    """
+
+    def __getitem__(self, ip):
+        from http.client import HTTPConnection, HTTPException
+        import json
+        connection = HTTPConnection('ip-api.com')
+        try:
+            connection.request('GET', '/json/' + ip)
+            response = connection.getresponse()
+            if response.status is not 200:
+                raise IPNotFound(ip, response.reason)
+            response_body = response.read().decode('UTF-8')
+        except HTTPException as e:
+            raise IPNotFound(ip, e)
+        finally:
+            connection.close()
+        return json.loads(response_body)
+
+
 class ApiGurus(Backend):
     """
     This backend implementation connects to the API of apigurus.com. It
