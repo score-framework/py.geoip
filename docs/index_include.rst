@@ -1,21 +1,48 @@
 .. module:: score.geoip
-.. role:: faint
 .. role:: confkey
+.. role:: confdefault
 
 ***********
 score.geoip
 ***********
-
-Introduction
-============
 
 This module handles requests to a backend that is intended to get
 location metadata for a given IP address. A backend is a configurable
 implementation providing a lookup functionality returning metadata as
 a dictionary.
 
+
+Quickstart
+==========
+
+>>> from pprint import pprint
+>>> pprint(score.geoip['8.8.8.8'])
+{'as': 'AS15169 Google Inc.',
+ 'city': 'Mountain View',
+ 'country': 'United States',
+ 'countryCode': 'US',
+ 'isp': 'Google',
+ 'lat': 37.386,
+ 'lon': -122.0838,
+ 'org': 'Google',
+ 'query': '8.8.8.8',
+ 'region': 'CA',
+ 'regionName': 'California',
+ 'status': 'success',
+ 'timezone': 'America/Los_Angeles',
+ 'zip': '94035'}
+
+
+Configuration
+=============
+
+.. autofunction:: init
+
+Details
+=======
+
 Command-Line Interface
-======================
+----------------------
 
 Upon installation, this module registers a :mod:`score.cli` command that can be
 used to lookup IP addresses. As a precondition the module
@@ -72,7 +99,7 @@ described in the :ref:`score.cli configuration management
     </location>
 
 Caching
-=======
+-------
 
 This module supports optional caching with :mod:`score.kvcache`. It registers a
 cache container named *score.geoip*, that needs to be configured as
@@ -80,8 +107,8 @@ described in the :ref:`score.kvcache configuration <kvcache_configuration>`.
 
 .. _geoip_configuration:
 
-Configuration
-=============
+API
+===
 
 .. autofunction:: init
 
@@ -89,7 +116,7 @@ Configuration
 
     .. attribute:: backend
 
-        The configurable backend.
+        The configured backend.
 
 .. autoclass:: IPNotFound
 
@@ -98,9 +125,11 @@ Configuration
     .. automethod:: score.geoip.backend.Backend.__getitem__
 
 Ready-to-use Backends
-=====================
+---------------------
 
 .. autoclass:: score.geoip.backend.Dummy
+
+.. autoclass:: score.geoip.backend.IpApi
 
 .. autoclass:: score.geoip.backend.ApiGurus
 
